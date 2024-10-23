@@ -1,0 +1,27 @@
+<header class="header">
+    <nav>
+      <a routerLink="/profile" class="profile-link">Profile</a>
+    </nav>
+  </header>
+  
+  <main class="content">
+    <section class="price-chart">
+      <h2>Live Price Chart</h2>
+      <canvas *ngIf="isBrowser" id="priceChart"></canvas>
+    </section>
+  
+    <section class="rings-section">
+      <h2>Rings for Sale</h2>
+      <div class="rings-grid">
+        <div *ngFor="let ring of visibleRings" class="ring-card">
+          <img [src]="ring.image" alt="{{ring.name}}" />
+          <p>{{ ring.name }}</p>
+          <p>{{ ring.price | currency:'USD' }}</p>
+        </div>
+      </div>
+  
+      <button *ngIf="visibleRings.length < rings.length" (click)="loadMore()" class="load-more-btn">
+        Load More
+      </button>
+    </section>
+</main>
