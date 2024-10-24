@@ -2,6 +2,7 @@ import { Component, ElementRef, Inject, PLATFORM_ID, Renderer2, ViewChild } from
 import { Chart, registerables  } from 'chart.js';
 import { CommonModule } from '@angular/common';
 import { isPlatformBrowser, isPlatformServer } from '@angular/common';
+import { CoinService } from '../../services/coin.service';
 
 @Component({
   selector: 'app-admin-home',
@@ -12,10 +13,11 @@ import { isPlatformBrowser, isPlatformServer } from '@angular/common';
 })
 export class AdminHomeComponent {
   public isBrowser: boolean;
+  private coinService: CoinService
 
-
-  constructor(private elementRef: ElementRef, @Inject(PLATFORM_ID) platformId: Object, private renderer2: Renderer2) {
+  constructor(private elementRef: ElementRef, @Inject(PLATFORM_ID) platformId: Object, private renderer2: Renderer2, coinService: CoinService) {
     this.isBrowser = isPlatformBrowser(platformId);
+    this.coinService = coinService
   }
 
   rings = [
@@ -32,11 +34,29 @@ export class AdminHomeComponent {
   visibleRings: any = [];
 
   ngOnInit() {
-    this.visibleRings = this.rings.slice(0, 6);
+    // this.visibleRings = this.rings.slice(0, 6);
+    this.getCoins()
   }
   ngAfterViewInit() {
     this.createChart();
   }
+
+  getCoins(){  
+    this.coinService.getAll().subscribe({
+      next: (response) => {
+        this.visibleRings = response.data;
+        console.log('Відповідь від сервера: фантастично юххууууу');
+        // console.log(response);
+      },
+      error: (error) => {
+        console.error('Помилка входу', error);
+      },
+      complete: () => {
+        console.log('Запит завершено');
+      }
+    });
+  } 
+
 
   loadMore() {
     const currentLength = this.visibleRings.length;
