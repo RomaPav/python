@@ -22,6 +22,9 @@ class UserRepository:
     def get_by_login(self, login: str) -> User:
         return self.db.query(User).filter(User.login == login).first()
 
+    def get_by_id(self, id: int) -> User:
+        return self.db.query(User).filter(User.id == id).first()
+
     def update_user(self, user: User):
         # user_updated = self.db.query(User).filter(User.id == user.id).one_or_none()
         # user_updated.update({

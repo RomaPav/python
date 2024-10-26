@@ -3,6 +3,7 @@ import { Chart, registerables  } from 'chart.js';
 import { CommonModule } from '@angular/common';
 import { isPlatformBrowser, isPlatformServer } from '@angular/common';
 import { CoinService } from '../../services/coin.service';
+import { TradeLotService } from '../../services/trade-lot.service';
 
 @Component({
   selector: 'app-admin-home',
@@ -14,24 +15,16 @@ import { CoinService } from '../../services/coin.service';
 export class AdminHomeComponent {
   public isBrowser: boolean;
   private coinService: CoinService
+  private tradeLotService: TradeLotService
+  visibleRings: any = [];
 
-  constructor(private elementRef: ElementRef, @Inject(PLATFORM_ID) platformId: Object, private renderer2: Renderer2, coinService: CoinService) {
+  constructor(private elementRef: ElementRef, @Inject(PLATFORM_ID) platformId: Object, private renderer2: Renderer2, coinService: CoinService, traadeLotService: TradeLotService) {
     this.isBrowser = isPlatformBrowser(platformId);
     this.coinService = coinService
+    this.tradeLotService = traadeLotService
   }
 
-  rings = [
-    { name: 'Gold Ring', price: 1500, image: 'assets/gold_ring.jpg' },
-    { name: 'Silver Ring', price: 700, image: 'assets/silver_ring.jpg' },
-    { name: 'Platinum Ring', price: 2500, image: 'assets/platinum_ring.jpg' },
-    { name: 'Palladium Ring', price: 2200, image: 'assets/palladium_ring.jpg' },
-    { name: 'Titanium Ring', price: 1800, image: 'assets/titanium_ring.jpg' },
-    { name: 'Copper Ring', price: 300, image: 'assets/copper_ring.jpg' },
-    { name: 'Bronze Ring', price: 400, image: 'assets/bronze_ring.jpg' },
-    { name: 'Steel Ring', price: 500, image: 'assets/steel_ring.jpg' }
-  ];
-
-  visibleRings: any = [];
+  
 
   ngOnInit() {
     // this.visibleRings = this.rings.slice(0, 6);
@@ -42,11 +35,10 @@ export class AdminHomeComponent {
   }
 
   getCoins(){  
-    this.coinService.getAll().subscribe({
+    this.tradeLotService.getStarted().subscribe({
       next: (response) => {
         this.visibleRings = response.data;
-        console.log('Відповідь від сервера: фантастично юххууууу');
-        // console.log(response);
+        // console.log(response.data);
       },
       error: (error) => {
         console.error('Помилка входу', error);
@@ -57,14 +49,39 @@ export class AdminHomeComponent {
     });
   } 
 
-
-  loadMore() {
-    const currentLength = this.visibleRings.length;
-    const nextRings = this.rings.slice(currentLength, currentLength + 6);
-    this.visibleRings = [...this.visibleRings, ...nextRings];
+  getPrice(){
+    
   }
-  startAuction(ring: any) {
-    alert(`Auction started for ${ring.name}`);
+
+  startAuction(tradeLot: any) {
+    tradeLot.trade_status = 'started';
+    this.tradeLotService.update(tradeLot).subscribe({
+      next: (response) => {
+        console.log(response);
+      },
+      error: (error) => {
+        console.error('Помилка входу', error);
+      },
+      complete: () => {
+        console.log('Запит завершено');
+      }
+    });
+  }
+
+  endAuction(tradeLot: any){
+    tradeLot.trade_status = 'closed';
+    this.tradeLotService.update(tradeLot).subscribe({
+      next: (response) => {
+        console.log(response);
+        this.getCoins()
+      },
+      error: (error) => {
+        console.error('Помилка входу', error);
+      },
+      complete: () => {
+        console.log('Запит завершено');
+      }
+    });
   }
 
 

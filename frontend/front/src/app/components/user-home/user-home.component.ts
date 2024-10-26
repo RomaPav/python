@@ -2,6 +2,8 @@ import { Component, ElementRef, Inject, PLATFORM_ID, Renderer2, ViewChild } from
 import { Chart, registerables  } from 'chart.js';
 import { CommonModule } from '@angular/common';
 import { isPlatformBrowser, isPlatformServer } from '@angular/common';
+import { TradeLotService } from '../../services/trade-lot.service';
+import { Router } from '@angular/router';
 
 @Component({
   selector: 'app-user-home',
@@ -12,10 +14,12 @@ import { isPlatformBrowser, isPlatformServer } from '@angular/common';
 })
 export class UserHomeComponent {
   public isBrowser: boolean;
+  private tradeLotService: TradeLotService
 
 
-  constructor(private elementRef: ElementRef, @Inject(PLATFORM_ID) platformId: Object, private renderer2: Renderer2) {
+  constructor(private elementRef: ElementRef, @Inject(PLATFORM_ID) platformId: Object, private renderer2: Renderer2, traadeLotService: TradeLotService,private router: Router) {
     this.isBrowser = isPlatformBrowser(platformId);
+    this.tradeLotService = traadeLotService
   }
 
   rings = [
@@ -32,7 +36,8 @@ export class UserHomeComponent {
   visibleRings: any = [];
 
   ngOnInit() {
-    this.visibleRings = this.rings.slice(0, 6);
+    this.getCoins()
+    // this.visibleRings = this.rings.slice(0, 6);
   }
   ngAfterViewInit() {
     this.createChart();
@@ -42,6 +47,26 @@ export class UserHomeComponent {
     const currentLength = this.visibleRings.length;
     const nextRings = this.rings.slice(currentLength, currentLength + 6);
     this.visibleRings = [...this.visibleRings, ...nextRings];
+  }
+
+
+  getCoins(){  
+    this.tradeLotService.getStartedForBuying().subscribe({
+      next: (response) => {
+        this.visibleRings = response.data;
+        // console.log(response.data);
+      },
+      error: (error) => {
+        console.error('Помилка входу', error);
+      },
+      complete: () => {
+        console.log('Запит завершено');
+      }
+    });
+  } 
+
+  navigateToAuction(auctionId: number) {
+    this.router.navigate(['/auction', auctionId]);
   }
 
 

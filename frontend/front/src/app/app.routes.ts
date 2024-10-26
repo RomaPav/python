@@ -4,6 +4,10 @@ import { RegistryComponent } from './components/registry/registry.component';
 import { UserHomeComponent } from './components/user-home/user-home.component';
 import { AdminHomeComponent } from './components/admin-home/admin-home.component';
 import { OwnerHomeComponent } from './components/owner-home/owner-home.component';
+import { ActionComponent } from './components/action/action.component';
+import { ProfileComponent } from './components/profile/profile.component';
+import { CreateTradeLotComponent } from './components/create-trade-lot/create-trade-lot.component';
+import { EditTradeLotComponent } from './components/edit-trade-lot/edit-trade-lot.component';
 
 export const routes: Routes = [
     // { path: '', redirectTo: '/login', pathMatch: 'full' },
@@ -16,5 +20,9 @@ export const routes: Routes = [
     { path: 'user-home', component: UserHomeComponent},
     { path: 'admin-home', component: AdminHomeComponent},
     { path: 'owner-home', component: OwnerHomeComponent,},
+    { path: 'auction/:id', component: ActionComponent },
+    { path: 'profile', component: ProfileComponent },
+    { path: 'create-lot', component: CreateTradeLotComponent },
+    { path: 'edit-lot', component: EditTradeLotComponent },
     // { path: '**', redirectTo: '/login' }
 ];

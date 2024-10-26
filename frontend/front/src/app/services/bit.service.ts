@@ -1,25 +1,25 @@
 import { HttpClient } from '@angular/common/http';
 import { Injectable } from '@angular/core';
-import { Order } from '../model/order';
 import { Observable } from 'rxjs';
+import { Coin } from '../model/coin';
+import { Bit } from '../model/bit';
 
 @Injectable({
   providedIn: 'root'
 })
-export class OrderService {
-
-  private apiUrl = "http://localhost:8080/order/"
+export class BitService {
+  private apiUrl = "http://localhost:8080/bit/"
 
   constructor(private http: HttpClient) { }
 
   getAll() :Observable<any>{
     return this.http.get(this.apiUrl)
   }
-  create(order: Order){
-    return this.http.post(`${this.apiUrl}`, order)
+  create(bit: Bit){
+    return this.http.post(`${this.apiUrl}`, bit)
   }
-  update(order: Order){
-    return this.http.put(`${this.apiUrl}`,order)
+  update(bit: Bit){
+    return this.http.put(`${this.apiUrl}`,bit)
   }
   delete(id: Number){
     return this.http.delete(`${this.apiUrl}${id}`)
@@ -27,7 +27,7 @@ export class OrderService {
   getById(id: Number) :Observable<any>{
     return this.http.get(`${this.apiUrl}${id}`)
   }
-  getByUserId(id: Number) :Observable<any>{
-    return this.http.get(`${this.apiUrl}user-id/${id}`)
+  getByTradeLotId(id: Number):Observable<any>{
+    return this.http.get(`${this.apiUrl}trade-lot/${id}`)
   }
 }

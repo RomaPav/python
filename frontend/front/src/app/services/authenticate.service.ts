@@ -7,6 +7,7 @@ import { RoleNames, UserRole } from '../model/enums/user_role';
 import { UserRequest } from '../model/user-request';
 // import {jwtDecod}
 interface JwtPayloadS {
+  id: number
   login: string;
   full_name: string;
   email: string;
@@ -45,7 +46,7 @@ export class AuthenticateService {
 
   static getUserFromJwt(token:string){
     const jwtUser = jwtDecode<JwtPayloadS>(token);
-    return new User(jwtUser.login, jwtUser.full_name, jwtUser.email, RoleNames[jwtUser.role])
+    return new User(jwtUser.id, jwtUser.login, jwtUser.full_name, jwtUser.email, RoleNames[jwtUser.role])
   }
 }
 

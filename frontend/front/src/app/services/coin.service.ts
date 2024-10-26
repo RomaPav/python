@@ -20,16 +20,16 @@ export class CoinService {
     return this.http.get(this.apiUrl)
   }
   create(coin: Coin){
-    return this.http.post(`${this.apiUrl}/`, coin)
+    return this.http.post(`${this.apiUrl}`, coin)
   }
   update(coin: Coin){
-    return this.http.put(`${this.apiUrl}/`,coin)
+    return this.http.put(`${this.apiUrl}`,coin)
   }
   delete(id: Number){
-    return this.http.delete(`${this.apiUrl}/${id}`)
+    return this.http.delete(`${this.apiUrl}${id}`)
   }
-  getById(id: Number) :Observable<any>{
-    return this.http.get(`${this.apiUrl}/${id}`)
+  getById(id: Number):Observable<any>{
+    return this.http.get(`${this.apiUrl}${id}`)
   }
 
   getPrice() :Observable<any>{

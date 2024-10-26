@@ -28,8 +28,9 @@ export class LoginComponent {
       this.authenticateService.login(this.username,this.password).subscribe({
         next: (response) => {
           const user: User = AuthenticateService.getUserFromJwt(response.access_token)
-          console.log('Відповідь від сервера: фантастично юххууууу');
+          console.log(user);
           this.navigate(user);
+          localStorage.setItem("user", JSON.stringify(user));
         },
         error: (error) => {
           console.error('Помилка входу', error);

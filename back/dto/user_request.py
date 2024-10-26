@@ -30,3 +30,8 @@ class UserRequest(BaseModel):
     #
     # def role(self) -> UserRole:
     #     return self._role
+
+
+class UserResponse(UserRequest):
+    id: int
+    orders: list
