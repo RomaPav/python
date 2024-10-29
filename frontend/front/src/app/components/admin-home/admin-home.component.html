@@ -7,7 +7,10 @@
   <main class="content">
     <section class="price-chart">
       <h2>Live Price Chart</h2>
-      <canvas *ngIf="isBrowser" id="priceChart"></canvas>
+      <!-- <canvas *ngIf="isBrowser" id="priceChart"></canvas> -->
+      <h2>Gold {{cuurentGoldPrice}}</h2>
+      <h2>Silver {{cuurentSilverPrice}}</h2>
+      <h2>Bronze {{cuurentBronzePrice}}</h2>
     </section>
   
     <section class="rings-section">
@@ -16,7 +19,7 @@
         <div *ngFor="let tradeLot of visibleRings" class="ring-card">
           <img [src]="tradeLot.coin.image" alt="{{tradeLot.coin.name}}" />
           <p>{{ tradeLot.coin.name }}</p>
-          <p>{{ tradeLot.coin.price | currency:'USD' }}</p>
+          <p>{{ tradeLot.coin.gold * this.cuurentGoldPrice + tradeLot.coin.silver * this.cuurentSilverPrice + tradeLot.coin.bronze * this.cuurentBronzePrice  | currency:'USD' }}</p>
           <button *ngIf="tradeLot.trade_status == 'not_started'" (click)="startAuction(tradeLot)" class="auction-btn">
             Start Auction
           </button>

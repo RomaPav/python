@@ -3,22 +3,22 @@
     <form>
       <div>
         <label for="fullName">Повне ім'я:</label>
-        <input type="text" id="fullName" [(ngModel)]="user.fullName" name="fullName" (ngModelChange)="onChanges()" />
+        <input type="text" id="fullName" [(ngModel)]="user.fullName" name="fullName" (ngModelChange)="onChanges()" required/>
       </div>
       
       <div>
         <label for="username">Ім'я користувача:</label>
-        <input type="text" id="username" [(ngModel)]="user.username" name="username" (ngModelChange)="onChanges()" />
+        <input type="text" id="username" [(ngModel)]="user.username" name="username" (ngModelChange)="onChanges()" required/>
       </div>
       
       <div>
         <label for="email">Email:</label>
-        <input type="email" id="email" [(ngModel)]="user.email" name="email" (ngModelChange)="onChanges()" />
+        <input type="email" id="email" [(ngModel)]="user.email" name="email" (ngModelChange)="onChanges()" required/>
       </div>
       
       <div>
         <label for="password">Пароль:</label>
-        <input type="password" id="password" [(ngModel)]="user.password" name="password" (ngModelChange)="onChanges()" />
+        <input type="password" id="password" [(ngModel)]="user.password" name="password" (ngModelChange)="onChanges()" required/>
       </div>
       
       <button type="button" [disabled]="!hasChanges" (click)="saveChanges()">Зберегти</button>

@@ -1,6 +1,7 @@
 import { Component, OnDestroy, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
+import { UserService } from '../../services/user.service';
 
 @Component({
   selector: 'app-profile',
@@ -10,14 +11,14 @@ import { FormsModule } from '@angular/forms';
   styleUrl: './profile.component.scss'
 })
 export class ProfileComponent {
-  user = {
-    fullName: 'Іван Іванов',
-    username: 'ivan.ivanov',
-    email: 'ivan@example.com',
-    password: ''
-  };
+  user: any;
+  originalUser: any;
+  constructor(private userService: UserService){
+    const user_storage = localStorage.getItem("user");
+    this.user = user_storage ? JSON.parse(user_storage) : null;
+    this.originalUser = { ...this.user }; 
+  }
 
-  originalUser = { ...this.user }; 
   hasChanges = false;
 
   onChanges() {
@@ -25,8 +26,34 @@ export class ProfileComponent {
   }
 
   saveChanges() {
-    this.originalUser = { ...this.user }; 
-    this.hasChanges = false; 
-    alert('Зміни збережено!'); 
+    console.log(this.user)
+    const userRequest = {
+      "id": this.user.id,
+      "role": this.user.role,
+      "login": this.user.login,
+      "email": this.user.email,
+      "password": this.user.password,
+      "full_name": this.user.fullName,
+    }
+    console.log(userRequest)
+     if (this.user.password.length > 8){
+      this.userService.update(userRequest).subscribe({
+        next: (response) => {
+          console.log(response);
+        },
+        error: (error) => {
+          console.error('Помилка входу', error);
+        },
+        complete: () => {
+          console.log('Запит завершено');
+        }
+      });
+      this.originalUser = { ...this.user }; 
+      this.hasChanges = false; 
+      alert('Зміни збережено!'); 
+      localStorage.setItem("user", JSON.stringify(this.user))
+     }else{
+      alert('Заповніть всі поля'); 
+     }
   }
 }

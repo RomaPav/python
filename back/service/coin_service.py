@@ -11,7 +11,7 @@ class CoinService:
 
     @staticmethod
     def validate_coin(coin: Coin) -> bool:
-        if not coin.name or not coin.price or coin.gold is None or coin.silver is None or coin.bronze is None:
+        if coin.name is None or coin.price is None or coin.gold is None or coin.silver is None or coin.bronze is None:
             return False
         return True
 
@@ -25,7 +25,7 @@ class CoinService:
         db_coin = Coin(**coin.dict())
         if not self.validate_coin(db_coin):
             return None
-        return self._coin_repository.add_coin(db_coin)
+        return self.coin_to_coin_response(self._coin_repository.add_coin(db_coin))
 
     def update_coin(self, coin: CoinBase) -> bool:
         db_coin = Coin(**coin.dict())

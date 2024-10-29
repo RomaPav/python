@@ -2,7 +2,9 @@ from dto.user_request import UserRequest
 from mapper.mapper import Mapper
 from model.user import User
 from repository.user_repository import UserRepository
+from passlib.context import CryptContext
 
+pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
 
 
 class UserService:
@@ -39,7 +41,8 @@ class UserService:
             return False
         if not self.check_user_if_exist(user_request):
             return False
-        user: User = Mapper.request_to_entity(user_request)
+        user: User = self.user_request_to_entity(user_request)
+        user.password = pwd_context.hash(user_request.password)
         return self._user_repository.update_user(user)
 
     def delete_user(self, user_request: UserRequest) -> bool:
@@ -50,3 +53,6 @@ class UserService:
         user: User = Mapper.request_to_entity(user_request)
         return self._user_repository.delete_user(user)
 
+    def user_request_to_entity(self, user: UserRequest):
+        return User(id=user.id, login=user.login, password=user.password, is_active=False, email=user.email,
+                    full_name=user.full_name, role=user.role)

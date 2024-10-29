@@ -32,6 +32,10 @@ class UserRequest(BaseModel):
     #     return self._role
 
 
+class UserUpdate(UserRequest):
+    id: int
+
+
 class UserResponse(UserRequest):
     id: int
     orders: list

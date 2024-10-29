@@ -37,7 +37,10 @@ class UserRepository:
         try:
             rows_affected = self.db.query(User).filter(User.id == user.id).update({
                 'login': user.login,
+                'full_name': user.full_name,
+                'email': user.email,
                 'password': user.password,
+                'role': user.role,
                 'is_active': user.is_active,
             })
 

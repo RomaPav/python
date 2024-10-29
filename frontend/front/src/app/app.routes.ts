@@ -23,6 +23,6 @@ export const routes: Routes = [
     { path: 'auction/:id', component: ActionComponent },
     { path: 'profile', component: ProfileComponent },
     { path: 'create-lot', component: CreateTradeLotComponent },
-    { path: 'edit-lot', component: EditTradeLotComponent },
+    { path: 'edit-lot/:id', component: EditTradeLotComponent },
     // { path: '**', redirectTo: '/login' }
 ];

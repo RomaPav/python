@@ -2,7 +2,7 @@ from http import HTTPStatus
 
 from fastapi import HTTPException, APIRouter
 
-from dto.user_request import UserRequest
+from dto.user_request import UserRequest, UserUpdate
 from repository.user_repository import UserRepository
 from service.user_service import UserService
 
@@ -10,22 +10,34 @@ user_service = UserService(UserRepository())
 router = APIRouter()
 
 
-@router.post("/register")
-def register_user(user_request: UserRequest):
-    status_create = user_service.registry(user_request)
-    if not status_create:
-        raise HTTPException(status_code=400, detail="Username already registered")
-    return HTTPStatus.CREATED
 
 
-@router.post("/login")
-def login(user_request: UserRequest):
-    status_create = user_service.get_user(user_request)
-    if status_create is None:
-        raise HTTPException(status_code=400, detail="Username already registered")
-    return HTTPStatus.ACCEPTED
+@router.put("/")
+def update_coin(user_request: UserUpdate):
+    data = user_service.update_user(user_request)
+    if not data:
+        raise HTTPException(status_code=400, detail="Something went wrong")
+    return {
+        "data": data,
+        "status": HTTPStatus.OK
+    }
 
-@router.get("/verify-token/{token}")
-async def verify_user_token(token: str):
-    UserService.verify_token(token=token)
-    return {"message": "Token is valid"}
+# @router.get("/{id}")
+# def get_by_id(id: int):
+#     data = user_service.get(id)
+#     # if not data:
+#     #     raise HTTPException(status_code=400, detail="Something went wrong")
+#     return {
+#         "data": data,
+#         "status": HTTPStatus.OK
+#     }
+
+# @router.delete("/{user_id}")
+# def delete_coin(user_id: int):
+#     data = user_service.delete_user(user_id)
+#     if not data:
+#         raise HTTPException(status_code=400, detail="Something went wrong")
+#     return {
+#         "data": data,
+#         "status": HTTPStatus.NO_CONTENT
+#     }

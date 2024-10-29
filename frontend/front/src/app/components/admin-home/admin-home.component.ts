@@ -1,9 +1,11 @@
-import { Component, ElementRef, Inject, PLATFORM_ID, Renderer2, ViewChild } from '@angular/core';
+import { AfterViewInit, Component, ElementRef, Inject, OnDestroy, OnInit, PLATFORM_ID, Renderer2, ViewChild } from '@angular/core';
 import { Chart, registerables  } from 'chart.js';
 import { CommonModule } from '@angular/common';
 import { isPlatformBrowser, isPlatformServer } from '@angular/common';
 import { CoinService } from '../../services/coin.service';
 import { TradeLotService } from '../../services/trade-lot.service';
+import { PriceService } from '../../services/price.service';
+import { BitService } from '../../services/bit.service';
 
 @Component({
   selector: 'app-admin-home',
@@ -12,58 +14,78 @@ import { TradeLotService } from '../../services/trade-lot.service';
   templateUrl: './admin-home.component.html',
   styleUrl: './admin-home.component.scss'
 })
-export class AdminHomeComponent {
+export class AdminHomeComponent implements OnInit, OnDestroy, AfterViewInit{
   public isBrowser: boolean;
   private coinService: CoinService
   private tradeLotService: TradeLotService
   visibleRings: any = [];
+  cuurentGoldPrice = 0;
+  cuurentSilverPrice = 0;
+  cuurentBronzePrice = 0;
+  private intervalId: any;
+  user : any;
 
-  constructor(private elementRef: ElementRef, @Inject(PLATFORM_ID) platformId: Object, private renderer2: Renderer2, coinService: CoinService, traadeLotService: TradeLotService) {
+  constructor(private elementRef: ElementRef, 
+      @Inject(PLATFORM_ID) platformId: Object,
+      coinService: CoinService,
+      traadeLotService: TradeLotService, 
+      private priceService: PriceService,
+      private bitService: BitService) {
     this.isBrowser = isPlatformBrowser(platformId);
     this.coinService = coinService
     this.tradeLotService = traadeLotService
+    const user_storage = localStorage.getItem("user");
+    this.user = user_storage ? JSON.parse(user_storage) : null;
   }
 
   
 
   ngOnInit() {
-    // this.visibleRings = this.rings.slice(0, 6);
     this.getCoins()
   }
   ngAfterViewInit() {
-    this.createChart();
+    // this.createChart();
+    this.intervalId = setInterval(() => {
+      this.getPrice();
+    }, 1000);
   }
-
+  ngOnDestroy(): void {
+    if (this.intervalId) {
+      clearInterval(this.intervalId);
+    }
+  }
   getCoins(){  
     this.tradeLotService.getStarted().subscribe({
       next: (response) => {
         this.visibleRings = response.data;
-        // console.log(response.data);
       },
       error: (error) => {
         console.error('Помилка входу', error);
       },
       complete: () => {
-        console.log('Запит завершено');
+        console.log('Запит завершено адмін');
       }
     });
   } 
 
-  getPrice(){
-    
-  }
-
   startAuction(tradeLot: any) {
     tradeLot.trade_status = 'started';
+    const bit ={
+      "user_id": this.user.id,
+      "trade_lot_id": tradeLot.id,
+      "amount": 1
+    }
+    this.bitService.create(bit);
     this.tradeLotService.update(tradeLot).subscribe({
       next: (response) => {
         console.log(response);
+        
       },
       error: (error) => {
         console.error('Помилка входу', error);
       },
       complete: () => {
-        console.log('Запит завершено');
+        console.log('Запит завершено адмін');
       }
     });
   }
@@ -79,64 +101,25 @@ export class AdminHomeComponent {
         console.error('Помилка входу', error);
       },
       complete: () => {
-        console.log('Запит завершено');
+        console.log('Запит завершено адмін');
       }
     });
   }
 
-
-  createChart() {
-    Chart.register(...registerables); 
-    const ctx = this.elementRef.nativeElement.querySelector('#priceChart');
-
-    if (ctx) {
-      new Chart(ctx, {
-        type: 'line',
-        data: {
-          labels: ['January', 'February', 'March', 'April', 'May', 'June'],
-          datasets: [{
-            label: 'Cold',
-            data: [1500, 1550, 1600, 1580, 1620, 1650],
-            borderColor: 'rgba(75, 192, 192, 1)',
-            borderWidth: 2,
-            fill: false
-          },
-          {
-            label: 'Silver',
-            data: [1510, 1450, 1120, 1500, 1200, 1610],
-            borderColor: 'rgba(175, 192, 192, 1)',
-            borderWidth: 2,
-            fill: false
-          },
-          {
-            label: 'Bronse',
-            data: [2000, 1550, 1630, 1581, 1450, 1050],
-            borderColor: 'rgba(75, 102, 192, 1)',
-            borderWidth: 2,
-            fill: false
-          }
-        ]
-        },
-        options: {
-          responsive: true,
-          scales: {
-            x: {
-              display: true,
-              title: {
-                display: true,
-                text: 'Month'
-              }
-            },
-            y: {
-              display: true,
-              title: {
-                display: true,
-                text: 'Price (USD)'
-              }
-            }
-          }
-        }
-      });
-    }
+  getPrice(){
+    this.priceService.getPrice(this.cuurentGoldPrice, this.cuurentSilverPrice, this.cuurentBronzePrice).subscribe({
+      next: (response) => {
+        this.cuurentGoldPrice = response.gold;
+        this.cuurentSilverPrice = response.silver;
+        this.cuurentBronzePrice = response.bronze;
+      },
+      error: (error) => {
+        console.error('Помилка входу', error);
+      },
+      complete: () => {
+        console.log('Запит завершено адмін');
+      }
+    });
   }
+
 }

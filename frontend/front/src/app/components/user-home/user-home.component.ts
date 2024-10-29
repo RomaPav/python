@@ -1,9 +1,10 @@
-import { Component, ElementRef, Inject, PLATFORM_ID, Renderer2, ViewChild } from '@angular/core';
+import { AfterViewInit, Component, ElementRef, Inject, OnDestroy, OnInit, PLATFORM_ID, Renderer2, ViewChild } from '@angular/core';
 import { Chart, registerables  } from 'chart.js';
 import { CommonModule } from '@angular/common';
 import { isPlatformBrowser, isPlatformServer } from '@angular/common';
 import { TradeLotService } from '../../services/trade-lot.service';
 import { Router } from '@angular/router';
+import { PriceService } from '../../services/price.service';
 
 @Component({
   selector: 'app-user-home',
@@ -12,41 +13,44 @@ import { Router } from '@angular/router';
   templateUrl: './user-home.component.html',
   styleUrl: './user-home.component.scss'
 })
-export class UserHomeComponent {
+export class UserHomeComponent implements OnInit, OnDestroy, AfterViewInit{
   public isBrowser: boolean;
   private tradeLotService: TradeLotService
+  cuurentGoldPrice = 0;
+  cuurentSilverPrice = 0;
+  cuurentBronzePrice = 0;
+  private intervalId: any;
 
+  chart: any;
 
-  constructor(private elementRef: ElementRef, @Inject(PLATFORM_ID) platformId: Object, private renderer2: Renderer2, traadeLotService: TradeLotService,private router: Router) {
+  constructor(private elementRef: ElementRef,
+     @Inject(PLATFORM_ID) platformId: Object, 
+     traadeLotService: TradeLotService,
+     private router: Router,
+    private priceService: PriceService) {
     this.isBrowser = isPlatformBrowser(platformId);
     this.tradeLotService = traadeLotService
   }
 
-  rings = [
-    { name: 'Gold Ring', price: 1500, image: 'assets/gold_ring.jpg' },
-    { name: 'Silver Ring', price: 700, image: 'assets/silver_ring.jpg' },
-    { name: 'Platinum Ring', price: 2500, image: 'assets/platinum_ring.jpg' },
-    { name: 'Palladium Ring', price: 2200, image: 'assets/palladium_ring.jpg' },
-    { name: 'Titanium Ring', price: 1800, image: 'assets/titanium_ring.jpg' },
-    { name: 'Copper Ring', price: 300, image: 'assets/copper_ring.jpg' },
-    { name: 'Bronze Ring', price: 400, image: 'assets/bronze_ring.jpg' },
-    { name: 'Steel Ring', price: 500, image: 'assets/steel_ring.jpg' }
-  ];
 
   visibleRings: any = [];
 
   ngOnInit() {
     this.getCoins()
-    // this.visibleRings = this.rings.slice(0, 6);
-  }
-  ngAfterViewInit() {
-    this.createChart();
   }
 
-  loadMore() {
-    const currentLength = this.visibleRings.length;
-    const nextRings = this.rings.slice(currentLength, currentLength + 6);
-    this.visibleRings = [...this.visibleRings, ...nextRings];
+  ngOnDestroy(): void {
+    if (this.intervalId) {
+      clearInterval(this.intervalId);
+    }
+    if (this.chart) {
+      this.chart.destroy();
+    }
+  }
+  ngAfterViewInit() {
+      this.intervalId = setInterval(() => {
+      this.getPrice();
+    }, 1000);
   }
 
 
@@ -54,7 +58,6 @@ export class UserHomeComponent {
     this.tradeLotService.getStartedForBuying().subscribe({
       next: (response) => {
         this.visibleRings = response.data;
-        // console.log(response.data);
       },
       error: (error) => {
         console.error('Помилка входу', error);
@@ -69,59 +72,21 @@ export class UserHomeComponent {
     this.router.navigate(['/auction', auctionId]);
   }
 
-
-  createChart() {
-    Chart.register(...registerables); 
-    const ctx = this.elementRef.nativeElement.querySelector('#priceChart');
-
-    if (ctx) {
-      new Chart(ctx, {
-        type: 'line',
-        data: {
-          labels: ['January', 'February', 'March', 'April', 'May', 'June'],
-          datasets: [{
-            label: 'Cold',
-            data: [1500, 1550, 1600, 1580, 1620, 1650],
-            borderColor: 'rgba(75, 192, 192, 1)',
-            borderWidth: 2,
-            fill: false
-          },
-          {
-            label: 'Silver',
-            data: [1510, 1450, 1120, 1500, 1200, 1610],
-            borderColor: 'rgba(175, 192, 192, 1)',
-            borderWidth: 2,
-            fill: false
-          },
-          {
-            label: 'Bronse',
-            data: [2000, 1550, 1630, 1581, 1450, 1050],
-            borderColor: 'rgba(75, 102, 192, 1)',
-            borderWidth: 2,
-            fill: false
-          }
-        ]
-        },
-        options: {
-          responsive: true,
-          scales: {
-            x: {
-              display: true,
-              title: {
-                display: true,
-                text: 'Month'
-              }
-            },
-            y: {
-              display: true,
-              title: {
-                display: true,
-                text: 'Price (USD)'
-              }
-            }
-          }
-        }
-      });
-    }
+  getPrice(){
+    this.priceService.getPrice(this.cuurentGoldPrice, this.cuurentSilverPrice, this.cuurentBronzePrice).subscribe({
+      next: (response) => {
+        this.cuurentGoldPrice = response.gold;
+        this.cuurentSilverPrice = response.silver;
+        this.cuurentBronzePrice = response.bronze;
+      },
+      error: (error) => {
+        console.error('Помилка входу', error);
+      },
+      complete: () => {
+        console.log('Запит завершено юзер');
+      }
+    });
   }
+  
+
 }

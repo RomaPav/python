@@ -25,8 +25,8 @@ def get():
 @router.post("/")
 def add_coin(coin_request: CoinCreate):
     data = coin_service.add_coin(coin_request)
-    if not data:
-        raise HTTPException(status_code=400, detail="Something went wrong")
+    # if not data:
+    #     raise HTTPException(status_code=400, detail="Something went wrong")
     return {
         "data": data,
         "status": HTTPStatus.CREATED

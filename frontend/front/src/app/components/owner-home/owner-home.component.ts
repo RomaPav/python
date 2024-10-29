@@ -1,9 +1,12 @@
-import { Component, ElementRef, Inject, PLATFORM_ID, Renderer2, ViewChild } from '@angular/core';
+import { AfterViewInit, Component, ElementRef, Inject, OnDestroy, OnInit, PLATFORM_ID, Renderer2, ViewChild } from '@angular/core';
 import { Chart, registerables  } from 'chart.js';
 import { CommonModule } from '@angular/common';
 import { isPlatformBrowser, isPlatformServer } from '@angular/common';
 import { CoinService } from '../../services/coin.service';
 import { TradeLotService } from '../../services/trade-lot.service';
+import { Router } from '@angular/router';
+import { PriceService } from '../../services/price.service';
+import { interval, Subject, switchMap, takeUntil } from 'rxjs';
 
 @Component({
   selector: 'app-owner-home',
@@ -12,13 +15,24 @@ import { TradeLotService } from '../../services/trade-lot.service';
   templateUrl: './owner-home.component.html',
   styleUrl: './owner-home.component.scss'
 })
-export class OwnerHomeComponent {
+export class OwnerHomeComponent implements OnInit, OnDestroy, AfterViewInit{
   public isBrowser: boolean;
   private coinService: CoinService
   private tradeLotService: TradeLotService
   visibleRings: any = [];
+  cuurentGoldPrice = 0;
+  cuurentSilverPrice = 0;
+  cuurentBronzePrice = 0;
+  private intervalId: any;
+  private destroy$ = new Subject<void>();
 
-  constructor(private elementRef: ElementRef, @Inject(PLATFORM_ID) platformId: Object, private renderer2: Renderer2, coinService: CoinService, traadeLotService: TradeLotService) {
+  constructor(private elementRef: ElementRef, 
+    @Inject(PLATFORM_ID) platformId: Object, 
+    private renderer2: Renderer2, 
+    coinService: CoinService, 
+    traadeLotService: TradeLotService, 
+    private router: Router,
+  private priceService: PriceService) {
     this.isBrowser = isPlatformBrowser(platformId);
     this.coinService = coinService
     this.tradeLotService = traadeLotService
@@ -27,89 +41,55 @@ export class OwnerHomeComponent {
   
 
   ngOnInit() {
-    // this.visibleRings = this.rings.slice(0, 6);
     this.getCoins()
   }
   ngAfterViewInit() {
-    this.createChart();
+    this.intervalId = setInterval(() => {
+      this.getPrice();
+    }, 1000);
+    this.destroy$.next();
+    this.destroy$.complete();
+  }
+  ngOnDestroy(): void {
+    if (this.intervalId) {
+      clearInterval(this.intervalId);
+    }
+  }
+  navigateToEditTrade(tradeId: number) {
+    this.router.navigate(['/edit-lot', tradeId]);
+  }
+  navigateToCreateLot() {
+    this.router.navigate(['/create-lot']);
   }
 
   getCoins(){  
     this.tradeLotService.getStarted().subscribe({
       next: (response) => {
         this.visibleRings = response.data;
-        // console.log(response.data);
       },
       error: (error) => {
         console.error('Помилка входу', error);
       },
       complete: () => {
-        console.log('Запит завершено');
+        console.log('Запит завершено власник');
       }
     });
   } 
 
   getPrice(){
-    
+    this.priceService.getPrice(this.cuurentGoldPrice, this.cuurentSilverPrice, this.cuurentBronzePrice).subscribe({
+      next: (response) => {
+        this.cuurentGoldPrice = response.gold;
+        this.cuurentSilverPrice = response.silver;
+        this.cuurentBronzePrice = response.bronze;
+      },
+      error: (error) => {
+        console.error('Помилка входу', error);
+      },
+      complete: () => {
+        console.log('Запит завершено власник');
+      }
+    });
   }
 
-  editAuction(tradeLot: any) {
-
-  }
-
-
-  createChart() {
-    Chart.register(...registerables); 
-    const ctx = this.elementRef.nativeElement.querySelector('#priceChart');
-
-    if (ctx) {
-      new Chart(ctx, {
-        type: 'line',
-        data: {
-          labels: ['January', 'February', 'March', 'April', 'May', 'June'],
-          datasets: [{
-            label: 'Cold',
-            data: [1500, 1550, 1600, 1580, 1620, 1650],
-            borderColor: 'rgba(75, 192, 192, 1)',
-            borderWidth: 2,
-            fill: false
-          },
-          {
-            label: 'Silver',
-            data: [1510, 1450, 1120, 1500, 1200, 1610],
-            borderColor: 'rgba(175, 192, 192, 1)',
-            borderWidth: 2,
-            fill: false
-          },
-          {
-            label: 'Bronse',
-            data: [2000, 1550, 1630, 1581, 1450, 1050],
-            borderColor: 'rgba(75, 102, 192, 1)',
-            borderWidth: 2,
-            fill: false
-          }
-        ]
-        },
-        options: {
-          responsive: true,
-          scales: {
-            x: {
-              display: true,
-              title: {
-                display: true,
-                text: 'Month'
-              }
-            },
-            y: {
-              display: true,
-              title: {
-                display: true,
-                text: 'Price (USD)'
-              }
-            }
-          }
-        }
-      });
-    }
-  }
 }

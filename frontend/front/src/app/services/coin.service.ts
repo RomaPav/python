@@ -19,7 +19,7 @@ export class CoinService {
   getAll() :Observable<any>{
     return this.http.get(this.apiUrl)
   }
-  create(coin: Coin){
+  create(coin: Coin) :Observable<any>{
     return this.http.post(`${this.apiUrl}`, coin)
   }
   update(coin: Coin){

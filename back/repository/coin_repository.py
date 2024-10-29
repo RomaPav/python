@@ -9,10 +9,10 @@ class CoinRepository:
     def get(self):
         return self.db.query(Coin).all()
 
-    def add_coin(self, order: Coin):
-        self.db.add(order)
+    def add_coin(self, coin: Coin):
+        self.db.add(coin)
         self.db.commit()
-        return True
+        return coin
 
     def delete_coin(self, id: int):
         self.db.query(Coin).filter(Coin.id == id).delete()
