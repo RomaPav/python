@@ -20,7 +20,7 @@
         <div *ngFor="let tradeLot of visibleRings" class="ring-card">
           <img [src]="tradeLot.coin.image" alt="{{tradeLot.coin.name}}" />
           <p>{{ tradeLot.coin.name }}</p>
-          <p>{{ tradeLot.coin.gold * this.cuurentGoldPrice + tradeLot.coin.silver * this.cuurentSilverPrice + tradeLot.coin.bronze * this.cuurentBronzePrice  | currency:'USD' }}</p>
+          <p>{{ tradeLot.coin.gold * this.cuurentGoldPrice + tradeLot.coin.silver * this.cuurentSilverPrice + tradeLot.coin.bronze * this.cuurentBronzePrice  | currency:'UAH':'symbol' }}</p>
           <button class="auction-btn" (click)="navigateToEditTrade(tradeLot.id)">
             Edit Auction
           </button>

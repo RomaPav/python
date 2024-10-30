@@ -6,6 +6,7 @@ import { CoinService } from '../../services/coin.service';
 import { TradeLotService } from '../../services/trade-lot.service';
 import { PriceService } from '../../services/price.service';
 import { BitService } from '../../services/bit.service';
+import { OrderService } from '../../services/order.service';
 
 @Component({
   selector: 'app-admin-home',
@@ -25,12 +26,12 @@ export class AdminHomeComponent implements OnInit, OnDestroy, AfterViewInit{
   private intervalId: any;
   user : any;
 
-  constructor(private elementRef: ElementRef, 
-      @Inject(PLATFORM_ID) platformId: Object,
+  constructor(@Inject(PLATFORM_ID) platformId: Object,
       coinService: CoinService,
       traadeLotService: TradeLotService, 
       private priceService: PriceService,
-      private bitService: BitService) {
+      private bitService: BitService,
+      private orderService:OrderService) {
     this.isBrowser = isPlatformBrowser(platformId);
     this.coinService = coinService
     this.tradeLotService = traadeLotService
@@ -92,6 +93,45 @@ export class AdminHomeComponent implements OnInit, OnDestroy, AfterViewInit{
 
   endAuction(tradeLot: any){
     tradeLot.trade_status = 'closed';
+
+    let gold = 0;
+    let silver = 0;
+    let bronze = 0;
+    this.priceService.getPrice(this.cuurentGoldPrice, this.cuurentSilverPrice, this.cuurentBronzePrice).subscribe({
+      next: (response) => {
+        gold = response.gold;
+        silver= response.silver;
+        bronze = response.bronze;
+        let updatedCoin :any;
+        let bit:any;
+        this.bitService.getByTradeLotId(tradeLot.id).subscribe({
+          next: (response) => {
+            bit=response.data;
+            this.coinService.getById(tradeLot.coin_id).subscribe({
+              next: (response) => {
+                updatedCoin=response.data;
+                updatedCoin.price = gold * updatedCoin.gold + silver * updatedCoin.silver + bronze* updatedCoin.bronze + bit.amount;
+                this.coinService.update(updatedCoin).subscribe({
+                  next: (response) => {
+                    console.log(response);
+                  }
+                });
+                const order = {
+                  "coin_id": updatedCoin.id,
+                  "user_id": bit.user_id
+                }
+                this.orderService.create(order).subscribe({
+                  next: (response) => {
+                    console.log(response);
+                  }
+                });
+              }
+            });
+          }
+        });
+      }
+    });
+
     this.tradeLotService.update(tradeLot).subscribe({
       next: (response) => {
         console.log(response);

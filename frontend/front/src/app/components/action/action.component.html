@@ -5,7 +5,7 @@
         <p>Золото: {{coin.gold}}%</p>
         <p>Срібло: {{coin.silver}}%</p>
         <p>Бронза: {{coin.bronze}}%</p>
-        <p>Початкова ціна: {{coin.gold * this.cuurentGoldPrice + coin.silver * this.cuurentSilverPrice + coin.bronze * this.cuurentBronzePrice}} грн</p>
+        <p>Початкова ціна: {{coin.gold * this.cuurentGoldPrice + coin.silver * this.cuurentSilverPrice + coin.bronze * this.cuurentBronzePrice | currency:'UAH':'symbol'}}</p>
         <p *ngIf="tradeInfo && tradeInfo.amount" >Поточна ставка: {{tradeInfo.amount}} грн</p>
       
         <h3>Ставка</h3>

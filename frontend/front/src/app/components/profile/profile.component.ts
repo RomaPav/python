@@ -2,6 +2,7 @@ import { Component, OnDestroy, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { UserService } from '../../services/user.service';
+import { OrderService } from '../../services/order.service';
 
 @Component({
   selector: 'app-profile',
@@ -13,13 +14,17 @@ import { UserService } from '../../services/user.service';
 export class ProfileComponent {
   user: any;
   originalUser: any;
-  constructor(private userService: UserService){
+  purchases: any[] =[];
+  constructor(private userService: UserService, private orderService: OrderService){
     const user_storage = localStorage.getItem("user");
     this.user = user_storage ? JSON.parse(user_storage) : null;
     this.originalUser = { ...this.user }; 
   }
 
   hasChanges = false;
+  ngOnInit(){
+    this.getPurchasses()
+  }
 
   onChanges() {
     this.hasChanges = JSON.stringify(this.user) !== JSON.stringify(this.originalUser);
@@ -55,5 +60,19 @@ export class ProfileComponent {
      }else{
       alert('Заповніть всі поля'); 
      }
+  }
+  getPurchasses(){
+      this.orderService.getByUserId(this.user.id).subscribe({
+        next: (response) => {
+          console.log(response)
+          this.purchases = response.data;
+        },
+        error: (error) => {
+          console.error('Помилка входу', error);
+        },
+        complete: () => {
+          console.log('Запит завершено');
+        }
+      });
   }
 }

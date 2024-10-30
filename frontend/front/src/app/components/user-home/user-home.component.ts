@@ -20,7 +20,7 @@ export class UserHomeComponent implements OnInit, OnDestroy, AfterViewInit{
   cuurentSilverPrice = 0;
   cuurentBronzePrice = 0;
   private intervalId: any;
-
+  user: any;
   chart: any;
 
   constructor(private elementRef: ElementRef,
@@ -29,7 +29,9 @@ export class UserHomeComponent implements OnInit, OnDestroy, AfterViewInit{
      private router: Router,
     private priceService: PriceService) {
     this.isBrowser = isPlatformBrowser(platformId);
-    this.tradeLotService = traadeLotService
+    this.tradeLotService = traadeLotService;
+    const user_storage = localStorage.getItem("user");
+    this.user = user_storage ? JSON.parse(user_storage) : null;
   }
 
 
@@ -38,7 +40,11 @@ export class UserHomeComponent implements OnInit, OnDestroy, AfterViewInit{
   ngOnInit() {
     this.getCoins()
   }
-
+  ngAfterViewInit() {
+    this.intervalId = setInterval(() => {
+      this.getPrice();
+    }, 1000);
+  }
   ngOnDestroy(): void {
     if (this.intervalId) {
       clearInterval(this.intervalId);
@@ -47,11 +53,7 @@ export class UserHomeComponent implements OnInit, OnDestroy, AfterViewInit{
       this.chart.destroy();
     }
   }
-  ngAfterViewInit() {
-      this.intervalId = setInterval(() => {
-      this.getPrice();
-    }, 1000);
-  }
+
 
 
   getCoins(){  
