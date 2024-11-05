@@ -41,7 +41,7 @@ export class ProfileComponent {
       "full_name": this.user.fullName,
     }
     console.log(userRequest)
-     if (this.user.password.length > 8){
+     if (this.user.password.length >= 8){
       this.userService.update(userRequest).subscribe({
         next: (response) => {
           console.log(response);
